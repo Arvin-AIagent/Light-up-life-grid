@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Light Up — The Life Grid</title>
+
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-F43P1SWTLT"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-F43P1SWTLT');
+</script>
+
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=Jost:wght@200;300;400;500&family=DM+Mono:wght@300;400&family=Noto+Serif+SC:wght@200;300;400&family=ZCOOL+XiaoWei&display=swap" rel="stylesheet"/>
+
+<style>
+/* ════════════════════════════════════════════════
+   LIGHT UP  ·  Design System Final (Gallery Minimalist)
+   ════════════════════════════════════════════════ */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --ink:        #111111;
+  --ink-mid:    #444444;
+  --ink-light:  #777777;
+  --ink-xlight: #B5B0A5;
+  --paper:      #F4F0E8;
+  --gold:       #C9A84C;
+  --gold-sat:   #A6852A;
+  --cell-past:      #4A4A4A;
+  --cell-future:    #E5E0D5;
+  --cell-future-bd: #C8C2B4;
+  --cell-gold:      #C9A84C;
+  --cell-current:   #C9A84C;
+  --cell-current-bd:#7A5E13;
+  --bg:         #D4CFC7;
+}
+
+body{font-family:'Jost',sans-serif;background:var(--bg);color:var(--ink);-webkit-font-smoothing:antialiased;overflow-x:hidden;}
+
+/* ── MULTI-LANGUAGE TYPOGRAPHY ── */
+[data-lang="zh"] body{font-family:'Noto Serif SC',serif;font-weight:200;}
+[data-lang="zh"] h1, [data-lang="zh"] h2, [data-lang="zh"] h3, [data-lang="zh"] .sb-num, [data-lang="zh"] .modal-wordmark, [data-lang="zh"] .tally-h {
+  font-family:'Noto Serif SC',serif;font-weight:200;letter-spacing:0.06em;
+}
+[data-lang="zh"] .form-label, [data-lang="zh"] .sb-label, [data-lang="zh"] .pane-eyebrow {
+  font-family:'Noto Serif SC',serif;font-weight:400;letter-spacing:0.12em;
+}
+
+/* ── NAV SYSTEM ── */
+.nav{
+  position:fixed;top:0;left:0;right:0;z-index:400;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:20px 40px;pointer-events:none;
+  background:linear-gradient(to bottom,rgba(244,240,232,0.96) 60%,rgba(244,240,232,0));
+  backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+}
+.nav-wordmark{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:400;letter-spacing:0.25em;color:var(--ink);pointer-events:all;}
+.nav-actions{display:flex;align-items:center;gap:12px;pointer-events:all;}
+#lang-btn{background:rgba(0,0,0,0.05);border:1px solid rgba(0,0,0,0.12);border-radius:20px;padding:6px 16px;font-family:'Jost',sans-serif;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--ink-mid);cursor:pointer;transition:all 0.2s;}
+#lang-btn:hover{background:rgba(0,0,0,0.09);color:var(--ink);}
+
+/* ── OVERLAY / DIALOG SYSTEM ── */
+#overlay{position:fixed;inset:0;z-index:900;background:rgba(237,234,228,0.98);display:flex;align-items:center;justify-content:center;}
+#overlay.hidden{display:none;}
+.modal{background:#fff;border-radius:16px;padding:52px;width:560px;max-width:94vw;max-height:92vh;overflow-y:auto;box-shadow:0 30px 90px rgba(0,0,0,0.06);position:relative;scrollbar-width:none;}
+.modal::-webkit-scrollbar{display:none;}
+.modal-wordmark{font-family:'Cormorant Garamond',serif;font-size:30px;letter-spacing:0.15em;margin-bottom:4px;}
+.modal-sub{font-size:11px;letter-spacing:0.2em;text-transform:uppercase;color:var(--ink-light);margin-bottom:24px;}
+.modal-intro{font-size:14px;font-weight:300;color:var(--ink-mid);line-height:1.75;margin-bottom:32px;padding-bottom:24px;border-bottom:1px solid rgba(0,0,0,0.06);letter-spacing:0.01em;}
+
+/* ── LINE-BASED INPUTS (防呆实体线) ── */
+.date-line-wrapper{
+  display:inline-flex;align-items:center;gap:6px;
+  border-bottom:1px solid rgba(0,0,0,0.15);padding:4px 0;
+  transition:all 0.3s cubic-bezier(0.4,0,0.2,1);position:relative;
+}
+.date-line-wrapper:focus-within{border-bottom-color:var(--gold);}
+.date-line-wrapper.error{border-bottom-color:#D9534F;animation:shake 0.4s ease-in-out;}
+.line-input{
+  background:none;border:none;outline:none;
+  font-family:'DM Mono',monospace;font-size:16px;color:var(--ink);
+  text-align:center;padding:0;
+}
+.line-input::-webkit-outer-spin-button,.line-input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0;}
+.line-input[type=number]{-moz-appearance:textfield;}
+.line-input::placeholder{color:var(--ink-xlight);font-weight:300;}
+
+.y-in { width: 46px; }
+.m-in, .d-in { width: 28px; }
+.line-sep { color: var(--ink-xlight); font-size: 14px; font-weight:300; user-select:none; }
+
+html[lang="zh"] .date-line-wrapper .y-in { order: 1; }
+html[lang="zh"] .date-line-wrapper .sep-1 { order: 2; }
+html[lang="zh"] .date-line-wrapper .m-in { order: 3; }
+html[lang="zh"] .date-line-wrapper .sep-2 { order: 4; }
+html[lang="zh"] .date-line-wrapper .d-in { order: 5; }
+
+html[lang="en"] .date-line-wrapper .m-in { order: 1; }
+html[lang="en"] .date-line-wrapper .sep-1 { order: 2; }
+html[lang="en"] .date-line-wrapper .d-in { order: 3; }
+html[lang="en"] .date-line-wrapper .sep-2 { order: 4; }
+html[lang="en"] .date-line-wrapper .y-in { order: 5; }
+
+/* ── FORM ELEMENTS ── */
+.form-section{margin-bottom:32px;}
+.form-label{display:block;font-size:12px;letter-spacing:0.15em;text-transform:uppercase;color:var(--gold-sat);margin-bottom:14px;font-weight:500;}
+.form-hint{font-size:13px;font-weight:300;color:var(--ink-light);margin-bottom:14px;line-height:1.4;}
+.form-input.text-field{
+  width:100%;height:40px;background:none;border:none;border-bottom:1px solid rgba(0,0,0,0.15);
+  font-family:inherit;font-size:15px;color:var(--ink);outline:none;transition:border-color 0.2s;
+}
+.form-input.text-field:focus{border-bottom-color:var(--gold);}
+.form-input::placeholder{color:var(--ink-xlight);font-weight:300;}
+
+.slider-wrap{display:flex;align-items:center;gap:16px;margin-top:10px;}
+.slider-num{font-family:'Cormorant Garamond',serif;font-size:26px;color:var(--gold-sat);min-width:36px;text-align:right;}
+input[type=range]{flex:1;-webkit-appearance:none;appearance:none;height:1px;background:rgba(0,0,0,0.15);outline:none;}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:10px;height:10px;border-radius:50%;background:var(--gold-sat);cursor:pointer;transition:transform 0.1s;}
+input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.3);}
+
+.milestone-row{display:flex;align-items:end;gap:24px;margin-bottom:16px;}
+.ms-input{flex:1;}
+.dream-row{display:flex;gap:12px;margin-bottom:12px;align-items:center;}
+.remove-btn{background:none;border:none;color:var(--ink-xlight);font-size:20px;cursor:pointer;padding:4px;transition:color 0.2s;}
+.remove-btn:hover{color:#D9534F;}
+
+.add-btn{background:none;border:1px dashed rgba(201,168,76,0.4);border-radius:6px;color:var(--gold-sat);font-size:12px;letter-spacing:0.1em;text-transform:uppercase;padding:10px;width:100%;cursor:pointer;transition:all 0.2s;}
+.add-btn:hover{background:rgba(201,168,76,0.04);border-color:var(--gold);}
+.submit-btn{width:100%;background:var(--ink);border:none;border-radius:6px;color:#fff;font-family:'Cormorant Garamond',serif;font-size:18px;letter-spacing:0.1em;padding:16px;cursor:pointer;margin-top:16px;transition:all 0.2s;}
+.submit-btn:hover{background:#2A2A2A;box-shadow:0 10px 30px rgba(0,0,0,0.08);}
+.browser-hint{font-size:11px;color:var(--ink-xlight);text-align:center;margin-top:14px;font-weight:300;}
+
+/* ── MAIN LAYOUT ── */
+#screen-section{min-height:100vh;display:flex;align-items:stretch;padding-top:68px;}
+.eink-screen{width:100%;max-width:1440px;margin:0 auto;background:var(--paper);display:flex;position:relative;box-shadow:0 0 0 1px rgba(0,0,0,0.05);}
+.grid-pane{flex:0 0 64%;padding:40px;overflow:hidden;border-right:1px solid rgba(0,0,0,0.06);display:flex;flex-direction:column;}
+.pane-eyebrow{font-size:12px;letter-spacing:0.15em;text-transform:uppercase;color:var(--ink-light);margin-bottom:24px;padding-bottom:12px;border-bottom:1px solid rgba(0,0,0,0.06);}
+
+.cell-grid{display:grid;gap:3px;align-content:start;}
+.cell{width:var(--cs,13px);height:var(--cs,13px);border-radius:2px;position:relative;transition:all 0.15s;}
+.cell.past{background:var(--cell-past);}
+.cell.future{background:var(--cell-future);box-shadow:inset 0 0 0 1px var(--cell-future-bd);}
+.cell.current{background:var(--cell-current);box-shadow:0 0 8px rgba(201,168,76,0.6);}
+.cell.gold{background:var(--cell-gold);cursor:pointer;}
+.cell.gold:hover{transform:scale(1.5);z-index:10;box-shadow:0 0 12px rgba(201,168,76,0.8);}
+
+/* ── SIDEBAR ── */
+.sidebar{flex:0 0 36%;padding:40px;position:relative;display:flex;flex-direction:column;}
+.sb-panel{position:absolute;inset:40px;display:flex;flex-direction:column;transition:all 0.3s;}
+.sb-panel.hidden{opacity:0;pointer-events:none;transform:translateX(12px);}
+.sb-panel.visible{opacity:1;transform:translateX(0);}
+
+.sb-wordmark{font-size:11px;letter-spacing:0.2em;color:var(--ink-light);margin-bottom:8px;}
+.sb-headline{display:flex;align-items:baseline;line-height:1;margin-bottom:4px;}
+.sb-num{font-family:'Cormorant Garamond',serif;font-size:80px;font-weight:300;}
+.sb-pct{font-family:'DM Mono',monospace;font-size:20px;color:var(--gold-sat);margin-left:4px;}
+.sb-sub{font-size:12px;letter-spacing:0.12em;text-transform:uppercase;color:var(--ink-light);margin-bottom:24px;}
+.sb-bar-track{height:1px;background:rgba(0,0,0,0.1);margin-bottom:32px;overflow:hidden;flex-shrink:0;}
+.sb-bar-fill{height:100%;background:var(--gold-sat);width:0%;transition:width 1s ease-out;}
+.sb-label{font-size:12px;letter-spacing:0.15em;text-transform:uppercase;color:var(--ink);margin-bottom:16px;flex-shrink:0;}
+
+.dream-list-ui{flex:1;overflow-y:auto;scrollbar-width:none;}
+.dream-list-ui::-webkit-scrollbar{display:none;}
+.dream-entry{display:flex;align-items:start;justify-content:space-between;padding:14px 0;border-bottom:1px solid rgba(0,0,0,0.05);}
+.d-left{display:flex;align-items:center;gap:12px;}
+.d-marker{width:6px;height:6px;border-radius:50%;border:1px solid var(--ink-light);flex-shrink:0;}
+.dream-entry.done .d-marker{background:var(--gold-sat);border-color:var(--gold-sat);}
+.d-text{font-size:14px;color:var(--ink);line-height:1.4;}
+.dream-entry.done .d-text{color:var(--ink-xlight);text-decoration:line-through;}
+.d-toggle{background:none;border:none;cursor:pointer;color:var(--gold-sat);font-size:11px;letter-spacing:0.05em;text-transform:uppercase;padding:2px 6px;}
+
+.back-btn{background:none;border:none;cursor:pointer;display:flex;align-items:center;gap:6px;font-family:inherit;font-size:12px;letter-spacing:0.1em;text-transform:uppercase;color:var(--ink-light);margin-bottom:32px;}
+.ms-date-disp{font-family:'Cormorant Garamond',serif;font-size:44px;color:var(--ink);line-height:1.1;margin-bottom:6px;}
+.ms-age-disp{font-family:'DM Mono',monospace;font-size:12px;color:var(--gold-sat);margin-bottom:24px;}
+.ms-content-disp{font-size:16px;line-height:1.7;color:var(--ink-mid);padding-left:16px;border-left:2px solid var(--gold);}
+
+/* ── ZEN MODE & TALLY ── */
+body.zen-active .nav,
+body.zen-active .sidebar,
+body.zen-active .pane-eyebrow,
+#res-btn { display: none !important; }
+body.zen-active #screen-section { padding-top: 0; background: var(--paper); align-items: center; justify-content: center; }
+body.zen-active .eink-screen { box-shadow: none; border: none; background: transparent; width: auto; display: block; }
+body.zen-active .grid-pane { border: none; padding: 0; width: auto; margin: 0 auto; }
+body.zen-active .zen-footer { display: flex !important; justify-content: space-between; align-items: flex-end; margin-top: 40px; border-top: 1px solid rgba(0,0,0,0.06); padding-top: 24px; width: 100%; }
+
+.zen-btn{background:none;border:1px solid rgba(0,0,0,0.15);border-radius:4px;color:var(--ink-light);font-size:11px;letter-spacing:0.1em;text-transform:uppercase;padding:8px 12px;cursor:pointer;flex:1;}
+.zen-btn:hover{border-color:var(--ink);color:var(--ink);}
+.zen-exit-btn{position:fixed;top:24px;right:24px;background:var(--ink);color:#fff;border:none;border-radius:20px;padding:8px 18px;font-size:12px;letter-spacing:0.05em;cursor:pointer;display:none;z-index:999;}
+body.zen-active .zen-exit-btn { display: block; }
+
+.tally-overlay{position:fixed;inset:0;z-index:950;background:rgba(17,17,17,0.6);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity 0.3s;}
+.tally-overlay.visible{opacity:1;pointer-events:all;}
+.tally-modal{background:var(--paper);border:1px solid rgba(0,0,0,0.1);border-radius:12px;width:100%;max-width:560px;padding:36px;box-shadow:0 20px 50px rgba(0,0,0,0.3);position:relative;margin:20px;}
+.tally-close{position:absolute;top:20px;right:20px;background:none;border:none;font-size:24px;cursor:pointer;color:var(--ink-light);line-height:1;}
+.tally-close:hover{color:var(--ink);}
+.tally-h{font-family:'Cormorant Garamond',serif;font-size:32px;font-weight:400;margin-bottom:12px;color:var(--ink);letter-spacing:0.02em;}
+.tally-p{font-family:'Jost',sans-serif;font-size:15px;color:var(--ink-mid);line-height:1.6;margin-bottom:24px;}
+.tally-frame-container{width:100%;height:320px;background:#fff;border:1px solid rgba(0,0,0,0.08);border-radius:6px;overflow:hidden;}
+
+/* ── TOOLTIP ── */
+.tip{position:fixed;z-index:500;background:#1A1A1A;color:#FFF;padding:8px 12px;font-family:'DM Mono',monospace;font-size:11px;border-radius:4px;pointer-events:none;opacity:0;transition:opacity 0.1s;}
+.tip.visible{opacity:1;}
+.tip-line { margin-top: 4px; border-top: 1px solid rgba(255,255,255,0.15); padding-top: 4px; color: var(--gold); }
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20%, 60% { transform: translateX(-4px); }
+  40%, 80% { transform: translateX(4px); }
+}
+
+@media (max-width: 768px) {
+  #screen-section{flex-direction:column;padding-top:60px;}
+  .eink-screen{flex-direction:column;}
+  .grid-pane{flex:0 0 100%;padding:24px 16px;border-right:none;border-bottom:1px solid rgba(0,0,0,0.06);}
+  .sidebar{flex:0 0 100%;padding:24px 16px;min-height:460px;}
+  .sb-panel{inset:24px 16px;}
+}
+</style>
+</head>
+<body>
+
+<button id="zen-exit" class="zen-exit-btn" onclick="exitZenMode()">✕ Exit Zen Mode</button>
+
+<nav class="nav">
+  <span class="nav-wordmark">LIGHT UP</span>
+  <div class="nav-actions">
+    <button id="lang-btn" onclick="toggleLanguage()">ZH</button>
+  </div>
+</nav>
+
+<div id="overlay">
+  <div class="modal">
+    <div class="modal-wordmark">LIGHT UP</div>
+    <div class="modal-sub" data-key="modalSub">THE LIFE SCALER</div>
+    <div class="modal-intro" data-key="modalIntro">1,080 squares. One square, one month. Dark blocks mark the past; pale blocks hold your remaining space. Map your journey cleanly.</div>
+    
+    <form id="setup-form" onsubmit="handleSetup(event)">
+      <div class="form-section">
+        <label class="form-label" data-key="lblDOB">1. BIRTHDATE</label>
+        <div class="date-line-wrapper" id="dob-wrapper">
+          <input type="number" id="dob-year" class="line-input y-in" placeholder="YYYY" required>
+          <span class="line-sep sep-1">/</span>
+          <input type="number" id="dob-month" class="line-input m-in" placeholder="MM" required>
+          <span class="line-sep sep-2">/</span>
+          <input type="number" id="dob-day" class="line-input d-in" placeholder="DD" required>
+        </div>
+      </div>
+      
+      <div class="form-section">
+        <label class="form-label" data-key="lblTarget">2. EXPECTANCY</label>
+        <p class="form-hint" data-key="hintTarget">Estimated absolute total lifespan.</p>
+        <div class="slider-wrap">
+          <input type="range" id="target-lifetime" min="60" max="100" value="80" oninput="g('slider-val').innerText=this.value">
+          <div class="slider-num" id="slider-val">80</div>
+        </div>
+      </div>
+      
+      <div class="form-section">
+        <label class="form-label" data-key="lblMilestones">3. BENCHMARKS</label>
+        <p class="form-hint" data-key="hintMilestones">Up to 3 high-light moments.</p>
+        <div id="milestones-container">
+          <div class="milestone-row">
+            <input type="text" class="form-input text-field ms-input" placeholder="Moment description" data-key-placeholder="msPl">
+            <div class="date-line-wrapper">
+              <input type="number" class="line-input y-in ms-year" placeholder="YYYY">
+              <span class="line-sep sep-1">-</span>
+              <input type="number" class="line-input m-in ms-month" placeholder="MM">
+              <span class="line-sep sep-2">-</span>
+              <input type="number" class="line-input d-in ms-day" placeholder="DD">
+            </div>
+          </div>
+          <div class="milestone-row">
+            <input type="text" class="form-input text-field ms-input" placeholder="Moment description" data-key-placeholder="msPl">
+            <div class="date-line-wrapper">
+              <input type="number" class="line-input y-in ms-year" placeholder="YYYY">
+              <span class="line-sep sep-1">-</span>
+              <input type="number" class="line-input m-in ms-month" placeholder="MM">
+              <span class="line-sep sep-2">-</span>
+              <input type="number" class="line-input d-in ms-day" placeholder="DD">
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="form-section">
+        <label class="form-label" data-key="lblDreams">4. HORIZONS</label>
+        <p class="form-hint" data-key="hintDreams">Core lifetime targets.</p>
+        <div id="dreams-container">
+          <div class="dream-row">
+            <input type="text" class="form-input text-field dream-input" placeholder="Core target text" data-key-placeholder="dreamPl" required>
+          </div>
+        </div>
+        <button type="button" class="add-btn" onclick="addDreamRow()" data-key="btnAddDream">+ Add horizon</button>
+      </div>
+      
+      <button type="submit" class="submit-btn" id="submit-btn" data-key="btnGenerate">GENERATE MATRIX</button>
+      <p class="browser-hint" data-key="browserHint">For permanent architecture, operate within Safari or Chrome.</p>
+    </form>
+  </div>
+</div>
+
+<div id="screen-section">
+  <div class="eink-screen">
+    <div class="grid-pane">
+      <div class="pane-eyebrow" id="grid-eyebrow">THE LIFE GRID</div>
+      <div class="cell-grid" id="cell-grid"></div>
+      
+      <div class="zen-footer" style="display:none;">
+        <div>
+          <h4 style="font-family:'Cormorant Garamond',serif; font-size:18px; letter-spacing:0.15em;">LIGHT UP</h4>
+          <p style="font-size:12px; font-weight:300; color:var(--ink-light); margin-top:2px;" id="zen-quote" data-key="zenQuote">A visual record of finite time.</p>
+        </div>
+        <div style="text-align:right;">
+          <div style="width:32px; height:32px; border:1px solid var(--ink); padding:2px; display:inline-block; opacity:0.4;">
+            <div style="width:100%; height:100%; background:linear-gradient(45deg,var(--ink) 25%,transparent 25%),linear-gradient(-45deg,var(--ink) 25%,transparent 25%); background-size:4px 4px;"></div>
+          </div>
+          <p style="font-family:'DM Mono',monospace; font-size:9px; color:var(--ink-xlight); margin-top:2px;">lightup.life</p>
+        </div>
+      </div>
+    </div>
+    
+    <div class="sidebar">
+      <div id="panel-dreams" class="sb-panel visible">
+        <div class="sb-wordmark">STATISTICS</div>
+        <div class="sb-headline">
+          <div class="sb-num" id="stat-pct">00</div>
+          <div class="sb-pct">%</div>
+        </div>
+        <div class="sb-sub" id="stat-sub">TIME ELAPSED</div>
+        <div class="sb-bar-track"><div class="sb-bar-fill" id="stat-bar"></div></div>
+        
+        <div class="sb-label" data-key="sbLabelGoals">MANIFESTO</div>
+        <div class="dream-list-ui" id="dream-list-ui"></div>
+        
+        <div style="display: flex; gap: 12px; margin-top: auto; padding-top: 24px; flex-shrink: 0;">
+          <button class="zen-btn" onclick="enterZenMode()" data-key="btnZen">Zen Mode</button>
+          <button class="zen-btn" style="color: var(--gold-sat); border-color: var(--gold-sat);" onclick="openTally()" data-key="peekCta">Pre-order</button>
+        </div>
+      </div>
+      
+      <div id="panel-milestone" class="sb-panel hidden">
+        <button class="back-btn" onclick="exitInspect()">
+          <svg width="12" height="12" viewBox="0 0 14 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5.5 11L1 6L5.5 1M1.5 6H13"/></svg>
+          <span data-key="btnBack">Back</span>
+        </button>
+        <div class="sb-wordmark" data-key="sbLabelMilestone">INSPECTING BENCHMARK</div>
+        <div class="ms-date-disp" id="ms-date-disp">---</div>
+        <div class="ms-age-disp" id="ms-age-disp">---</div>
+        <div class="ms-content-disp" id="ms-content-disp">---</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="tally-overlay" class="tally-overlay">
+  <div class="tally-modal">
+    <button id="tally-close" class="tally-close">&times;</button>
+    <h3 class="tally-h" data-key="tallyHead">Join the Waitlist</h3>
+    <p class="tally-p" data-key="tallyBody">We are prototyping an ambient, low-power E-ink display that syncs beautifully with this dashboard. Secure your place in line.</p>
+    <div class="tally-frame-container">
+      <iframe src="https://tally.so/embed/mO5X51?alignLeft=1&hideTitle=1&transparentBackground=1&dynamicHeight=1" loading="lazy" width="100%" height="100%" frameborder="0" marginheight="0" marginwidth="0" title="Light Up - Waitlist"></iframe>
+    </div>
+  </div>
+</div>
+
+<div id="tooltip" class="tip"></div>
+
+<script>
+const i18n = {
+  en: {
+    modalSub: "THE LIFE SCALER",
+    modalIntro: "1,080 squares. One square, one month. Dark blocks mark the past; pale blocks hold your remaining space. Map your journey cleanly.",
+    lblDOB: "1. BIRTHDATE",
+    lblTarget: "2. EXPECTANCY",
+    hintTarget: "Estimated absolute total lifespan.",
+    lblMilestones: "3. BENCHMARKS",
+    hintMilestones: "Up to 3 high-light moments.",
+    msPl: "Moment description",
+    lblDreams: "4. HORIZONS",
+    hintDreams: "Core lifetime targets.",
+    dreamPl: "Core target text",
+    btnAddDream: "+ Add horizon",
+    btnGenerate: "GENERATE MATRIX",
+    browserHint: "For permanent architecture, operate within Safari or Chrome.",
+    gridEyebrow: "THE LIFE GRID",
+    statSub: "TIME ELAPSED",
+    sbLabelGoals: "MANIFESTO",
+    sbLabelMilestone: "INSPECTING BENCHMARK",
+    btnBack: "Back",
+    btnZen: "Zen Mode",
+    peekCta: "Pre-order",
+    tallyHead: "Join the Waitlist",
+    tallyBody: "We are prototyping an ambient, low-power E-ink display that syncs beautifully with this dashboard. Secure your place in line.",
+    zenQuote: "A visual record of finite time.",
+    tooltipPast: "Elapsed Month",
+    tooltipFuture: "White Space",
+    tooltipCurrent: "Present Intersection",
+    months: ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"]
+  },
+  zh: {
+    modalSub: "生命之网",
+    modalIntro: "一千零八十个方格。一格，一月。深色为来路，留白为余生。纯净记录，见证时光。",
+    lblDOB: "1. 出生日期",
+    lblTarget: "2. 终点预期",
+    hintTarget: "理性设定你的生命预期总长。",
+    lblMilestones: "3. 重要刻度",
+    hintMilestones: "记录最多2个生命至暗或高光时刻。",
+    msPl: "记下那一刻的事件",
+    lblDreams: "4. 远景清单",
+    hintDreams: "这一生你必须抵达的终点。",
+    dreamPl: "写下具体的阶段目标",
+    btnAddDream: "+ 增加长期愿景",
+    btnGenerate: "开启生命刻度盘",
+    browserHint: "为持久保存资产，建议在 Safari / Chrome 默认浏览器中打开。",
+    gridEyebrow: "生命刻度",
+    statSub: "已逝岁月",
+    sbLabelGoals: "终身志向",
+    sbLabelMilestone: "刻下的里程碑印记",
+    btnBack: "返回愿景",
+    btnZen: "进入禅定画卷",
+    peekCta: "预约体验",
+    tallyHead: "加入硬件首发等待区",
+    tallyBody: "我们正在打造一款低功耗、纯净治愈的桌面 E-ink 电子墨水生命网格屏幕，能与此面板完美同步。立即预约获取首批席位。",
+    zenQuote: "有限时间的视觉切片。",
+    tooltipPast: "已度过历史",
+    tooltipFuture: "未来未定格",
+    tooltipCurrent: "当下这一月",
+    months: ["1月","2月","3月","4月","5月","6月","7月","8月","9月","10月","11月","12月"]
+  }
+};
+
+let state = { lang: 'en', dob: null, targetLifetime: 80, elapsedMonths: 0, totalMonths: 960, dreams: [], milestones: [] };
+function g(id){ return document.getElementById(id); }
+
+/* ── Analytics Tracker ── */
+const Analytics = {
+  track: function(ev, data={}) {
+    console.log(`[Analytics] ${ev}`, data);
+    if(window.gtag) { window.gtag('event', ev, data); }
+  }
+};
+
+window.addEventListener('DOMContentLoaded', () => {
+  bindAutoJump(g('dob-wrapper'));
+  document.querySelectorAll('#milestones-container .date-line-wrapper').forEach(bindAutoJump);
+  if(loadState()) bootApp();
+});
+
+function bindAutoJump(wrapper) {
+  const inputs = Array.from(wrapper.querySelectorAll('.line-input'));
+  inputs.forEach((input, idx) => {
+    input.addEventListener('input', () => {
+      const limit = input.classList.contains('y-in') ? 4 : 2;
+      if (input.value.length >= limit && inputs[idx + 1]) {
+        inputs[idx + 1].focus();
+      }
+    });
+    input.addEventListener('focus', () => wrapper.classList.remove('error'));
+  });
+}
+
+function parseAndValidateCluster(wrapper) {
+  const y = parseInt(wrapper.querySelector('.y-in').value);
+  const m = parseInt(wrapper.querySelector('.m-in').value);
+  const d = parseInt(wrapper.querySelector('.d-in').value);
+  if (isNaN(y) || isNaN(m) || isNaN(d)) return null;
+  const dateObj = new Date(y, m - 1, d);
+  if (dateObj.getFullYear() !== y || dateObj.getMonth() !== (m - 1) || dateObj.getDate() !== d) {
+    wrapper.classList.add('error');
+    return null;
+  }
+  return dateObj;
+}
+
+function monthsBetween(s, e) {
+  return (e.getFullYear() - s.getFullYear()) * 12 + (e.getMonth() - s.getMonth());
+}
+
+function handleSetup(e) {
+  e.preventDefault();
+  const dobDate = parseAndValidateCluster(g('dob-wrapper'));
+  if (!dobDate || dobDate > new Date()) {
+    g('dob-wrapper').classList.add('error');
+    return;
+  }
+
+  let lifeExpectancy = parseInt(g('target-lifetime').value);
+  const currentAge = new Date().getFullYear() - dobDate.getFullYear();
+  if (currentAge >= lifeExpectancy) {
+    lifeExpectancy = Math.min(100, currentAge + 10);
+  }
+
+  state.dob = dobDate;
+  state.targetLifetime = lifeExpectancy;
+  state.elapsedMonths = Math.max(0, monthsBetween(dobDate, new Date()));
+  state.totalMonths = lifeExpectancy * 12;
+
+  state.dreams = [];
+  document.querySelectorAll('.dream-input').forEach((inp, i) => {
+    if(inp.value.trim()) state.dreams.push({ id: i, text: inp.value.trim(), done: false, nodeIndex: null });
+  });
+
+  state.milestones = [];
+  document.querySelectorAll('#milestones-container .milestone-row').forEach(row => {
+    const text = row.querySelector('.ms-input').value.trim();
+    const dateObj = parseAndValidateCluster(row.querySelector('.date-line-wrapper'));
+    if (text && dateObj) {
+      const diff = monthsBetween(state.dob, dateObj);
+      if (diff >= 0 && diff < state.totalMonths) {
+        state.milestones.push({ index: diff, label: text, date: dateObj });
+      }
+    }
+  });
+
+  saveState();
+  bootApp();
+  Analytics.track('Grid Generated', { lifetime: lifeExpectancy });
+}
+
+function bootApp() {
+  g('overlay').classList.add('hidden');
+  document.body.classList.add('app-ready');
+  renderSidebar();
+  renderGrid();
+  renderDreamList();
+  injectResetButton();
+}
+
+function renderGrid() {
+  const container = g('cell-grid');
+  container.innerHTML = '';
+  const cols = window.innerWidth < 768 ? 18 : 36;
+  container.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
+
+  const msIdx = {}; state.milestones.forEach(m => msIdx[m.index] = m);
+  const drIdx = {}; state.dreams.forEach(d => { if(d.done && d.nodeIndex !== null) drIdx[d.nodeIndex] = d; });
+
+  for (let i = 0; i < state.totalMonths; i++) {
+    const cell = document.createElement('div');
+    if (i < state.elapsedMonths) cell.className = 'cell past';
+    else if (i === state.elapsedMonths) cell.className = 'cell current';
+    else cell.className = 'cell future';
+
+    if (msIdx[i] || drIdx[i]) cell.classList.add('gold');
+
+    cell.addEventListener('mouseenter', (e) => triggerTooltip(e, i, msIdx[i], drIdx[i]));
+    cell.addEventListener('mouseleave', clearTooltip);
+    cell.addEventListener('click', () => { if(msIdx[i]||drIdx[i]) inspectNode(i, msIdx[i], drIdx[i]); });
+    container.appendChild(cell);
+  }
+}
+
+function renderSidebar() {
+  const pct = Math.min(100, Math.round((state.elapsedMonths / state.totalMonths) * 100));
+  g('stat-pct').innerText = String(pct).padStart(2, '0');
+  g('stat-bar').style.width = `${pct}%`;
+}
+
+function renderDreamList() {
+  const container = g('dream-list-ui');
+  container.innerHTML = '';
+  state.dreams.forEach(d => {
+    const el = document.createElement('div');
+    el.className = `dream-entry ${d.done ? 'done' : ''}`;
+    el.innerHTML = `
+      <div class="d-left">
+        <div class="d-marker"></div>
+        <div class="d-text">${d.text}</div>
+      </div>
+      <button class="d-toggle" onclick="toggleDreamState(${d.id})">${d.done ? 'Undo' : 'Done'}</button>
+    `;
+    container.appendChild(el);
+  });
+}
+
+function toggleDreamState(id) {
+  const d = state.dreams.find(item => item.id === id);
+  if (!d) return;
+  d.done = !d.done;
+  d.nodeIndex = d.done ? state.elapsedMonths : null;
+  saveState(); renderGrid(); renderDreamList();
+  if(d.done) Analytics.track('Dream Completed', { goal: d.text });
+}
+
+function inspectNode(idx, ms, dream) {
+  g('panel-dreams').className = 'sb-panel hidden';
+  g('panel-milestone').className = 'sb-panel visible';
+  const targetDate = new Date(state.dob); targetDate.setMonth(targetDate.getMonth() + idx);
+  const mStr = i18n[state.lang].months[targetDate.getMonth()];
+  g('ms-date-disp').innerText = `${mStr} ${targetDate.getFullYear()}`;
+  g('ms-age-disp').innerText = `AGE — ${Math.floor(idx/12)} YRS ${idx%12} MOS`;
+  
+  let html = '';
+  if(ms) html += `✦ ${ms.label}<br/>`;
+  if(dream) html += `✔ ${dream.text}<br/>`;
+  g('ms-content-disp').innerHTML = html;
+  Analytics.track('Inspected Milestone', { index: idx });
+}
+function exitInspect() {
+  g('panel-milestone').className = 'sb-panel hidden';
+  g('panel-dreams').className = 'sb-panel visible';
+}
+
+function enterZenMode() { document.body.classList.add('zen-active'); renderGrid(); Analytics.track('Entered Zen Mode'); }
+function exitZenMode() { document.body.classList.remove('zen-active'); renderGrid(); }
+
+function openTally(){ g('tally-overlay').classList.add('visible'); Analytics.track('Opened Tally Waitlist'); }
+g('tally-close').addEventListener('click', () => g('tally-overlay').classList.remove('visible'));
+g('tally-overlay').addEventListener('click', (e) => { if(e.target === g('tally-overlay')) g('tally-overlay').classList.remove('visible'); });
+
+function triggerTooltip(e, idx, ms, dream) {
+  const tip = g('tooltip');
+  const d = new Date(state.dob); d.setMonth(d.setMonth(d.getMonth() + idx));
+  let status = i18n[state.lang].tooltipFuture;
+  if(idx < state.elapsedMonths) status = i18n[state.lang].tooltipPast;
+  if(idx === state.elapsedMonths) status = i18n[state.lang].tooltipCurrent;
+
+  let html = `<strong>${i18n[state.lang].months[d.getMonth()]} ${d.getFullYear()}</strong> (${status})<br/>Age: ${Math.floor(idx/12)}y ${idx%12}m`;
+  if(ms || dream) html += `<div class="tip-line">${ms ? '✦ '+ms.label : ''} ${dream ? '✔ '+dream.text : ''}</div>`;
+  
+  tip.innerHTML = html; tip.classList.add('visible');
+  tip.style.left = `${e.clientX + 12}px`; tip.style.top = `${e.clientY + 12}px`;
+}
+function clearTooltip() { g('tooltip').classList.remove('visible'); }
+
+function toggleLanguage() {
+  state.lang = state.lang === 'en' ? 'zh' : 'en';
+  document.documentElement.lang = state.lang;
+  document.documentElement.setAttribute('data-lang', state.lang);
+  g('lang-btn').innerText = state.lang === 'en' ? 'ZH' : 'EN';
+  
+  document.querySelectorAll('[data-key]').forEach(el => {
+    const key = el.getAttribute('data-key');
+    if(i18n[state.lang][key]) el.innerText = i18n[state.lang][key];
+  });
+  document.querySelectorAll('[data-key-placeholder]').forEach(el => {
+    const key = el.getAttribute('data-key-placeholder');
+    if(i18n[state.lang][key]) el.setAttribute('placeholder', i18n[state.lang][key]);
+  });
+  if(state.dob) { renderGrid(); renderDreamList(); }
+}
+
+function addDreamRow() {
+  const row = document.createElement('div'); row.className = 'dream-row';
+  row.innerHTML = `<input type="text" class="form-input text-field dream-input" placeholder="${i18n[state.lang].dreamPl}" required><button type="button" class="remove-btn" onclick="this.parentElement.remove()">&times;</button>`;
+  g('dreams-container').appendChild(row);
+}
+
+function injectResetButton() {
+  if(g('res-btn')) return;
+  const btn = document.createElement('button'); btn.id = 'res-btn';
+  btn.innerText = state.lang === 'en' ? 'RESET' : '重置';
+  btn.style.cssText = "background:none; border:1px solid rgba(0,0,0,0.15); border-radius:20px; padding:6px 14px; font-size:11px; color:var(--ink-light); cursor:pointer;";
+  btn.onclick = () => { localStorage.removeItem('lu_v8_state'); window.location.reload(); };
+  g('lang-btn').parentElement.appendChild(btn);
+}
+
+function saveState() {
+  localStorage.setItem('lu_v8_state', JSON.stringify({
+    lang: state.lang, dob: state.dob.toISOString(), targetLifetime: state.targetLifetime, dreams: state.dreams, milestones: state.milestones
+  }));
+}
+function loadState() {
+  const raw = localStorage.getItem('lu_v8_state'); if(!raw) return false;
+  try {
+    const p = JSON.parse(raw); state.lang = p.lang; state.dob = new Date(p.dob);
+    state.targetLifetime = p.targetLifetime; state.dreams = p.dreams;
+    state.milestones = p.milestones.map(m => ({ index: m.index, label: m.label, date: new Date(m.date) }));
+    state.elapsedMonths = Math.max(0, monthsBetween(state.dob, new Date()));
+    state.totalMonths = state.targetLifetime * 12;
+    document.documentElement.lang = state.lang; document.documentElement.setAttribute('data-lang', state.lang);
+    g('lang-btn').innerText = state.lang === 'en' ? 'ZH' : 'EN';
+    return true;
+  } catch(e) { return false; }
+}
+window.addEventListener('resize', () => { if(state.dob) renderGrid(); });
+</script>
+</body>
+</html>
